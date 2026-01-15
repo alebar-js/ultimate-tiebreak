@@ -199,3 +199,37 @@ export function createQualifierRound(players: IPlayer[]): IRound | null {
     isComplete: false,
   };
 }
+
+/**
+ * Get the display name for a round based on the number of teams
+ * - 2 teams → "Final"
+ * - 4 teams → "Semifinals"
+ * - 8 teams → "Quarterfinals"
+ * - 16 teams → "Round of 16"
+ * - More teams → "Round X"
+ * - Round 0 → "Qualifier"
+ */
+export function getRoundDisplayName(round: IRound): string {
+  // Qualifier is always round 0
+  if (round.roundNumber === 0) {
+    return 'Qualifier';
+  }
+
+  // Calculate number of teams based on matches (each match has 2 teams)
+  const numTeams = round.matches.length * 2;
+
+  // Named rounds based on team count
+  switch (numTeams) {
+    case 2:
+      return 'Final';
+    case 4:
+      return 'Semifinals';
+    case 8:
+      return 'Quarterfinals';
+    case 16:
+      return 'Round of 16';
+    default:
+      // For larger rounds or irregular sizes, use round number
+      return `Round ${round.roundNumber}`;
+  }
+}

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { IRound, IPlayer } from '@/lib/types';
+import { getRoundDisplayName } from '@/lib/game-logic';
 import Button from '@/components/ui/Button';
 
 interface RoundDetailPanelProps {
@@ -50,6 +51,18 @@ export default function RoundDetailPanel({
       if (!target) return;
 
       if (containerRef.current && !containerRef.current.contains(target)) {
+        // Check if clicking on another bracket element (match node or round badge)
+        const targetElement = target as Element;
+        const isClickOnBracketElement =
+          targetElement.closest?.('.match-node') ||
+          targetElement.closest?.('.round-badge');
+
+        if (isClickOnBracketElement) {
+          // Don't close - let the parent handle the selection change
+          // The panel will update to show the new match/round details
+          return;
+        }
+
         closeWithAnimation();
       }
     };
@@ -61,7 +74,7 @@ export default function RoundDetailPanel({
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('touchstart', handlePointerDown);
     };
-  }, []);
+  }, [onClose]);
 
   useEffect(() => {
     return () => {
@@ -95,7 +108,7 @@ export default function RoundDetailPanel({
         <div>
           <h3 className="font-semibold">Round Details</h3>
           <p className="text-xs text-gray-500">
-            {round.roundNumber === 0 ? 'Qualifier' : `Round ${round.roundNumber}`}
+            {getRoundDisplayName(round)}
           </p>
         </div>
         <button

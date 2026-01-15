@@ -15,7 +15,7 @@ export default function MatchCard({ match, players, onResult, disabled = false }
   const getPlayerNames = (playerIds: string[]) => {
     return playerIds
       .map((id) => players.find((p) => p.id === id)?.name || 'Unknown')
-      .join(' & ');
+      .join(' \n');
   };
 
   const team1Names = getPlayerNames(match.team1.playerIds);

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import type { ITournament } from '@/lib/types';
+import { getRoundDisplayName } from '@/lib/game-logic';
 import Button from '@/components/ui/Button';
 
 interface BracketHeaderProps {
@@ -39,14 +40,9 @@ export default function BracketHeader({
       {/* Center: Round Info */}
       <div className="flex items-center gap-3">
         <div className="text-sm">
-          {tournament.currentRound === 0 ? (
-            <span className="font-semibold text-primary">Qualifier</span>
-          ) : (
-            <>
-              <span className="text-gray-500">Round</span>{' '}
-              <span className="font-semibold text-primary">{tournament.currentRound}</span>
-            </>
-          )}
+          <span className="font-semibold text-primary">
+            {currentRound ? getRoundDisplayName(currentRound) : 'No rounds'}
+          </span>
         </div>
         <div className="h-4 w-px bg-border" />
         <div className="text-sm">

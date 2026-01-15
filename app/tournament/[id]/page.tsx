@@ -35,6 +35,7 @@ export default function TournamentPage({ params }: TournamentPageProps) {
   const { id } = use(params);
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const [selectedRoundId, setSelectedRoundId] = useState<number | null>(null);
+  const [showBracketInCompleted, setShowBracketInCompleted] = useState(false);
 
   // Query
   const { data: tournament, isLoading: loading, error } = useTournament(id);
@@ -163,9 +164,73 @@ export default function TournamentPage({ params }: TournamentPageProps) {
     return null;
   }
 
-  // Victory Screen
+  // Victory Screen or Bracket View for COMPLETED
   if (tournament.status === 'COMPLETED') {
-    return <VictoryScreen players={tournament.players} tournamentName={tournament.name} />;
+    if (showBracketInCompleted) {
+      // Show bracket with a back button to return to victory screen
+      return (
+        <div className="h-screen flex flex-col overflow-hidden">
+          {/* Header with back to victory button */}
+          <header className="bg-white border-b border-border px-4 py-3 flex items-center justify-between gap-4 z-20">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setShowBracketInCompleted(false)}
+                className="text-sm text-gray-500 hover:text-primary transition-colors flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Results
+              </button>
+              <div className="h-6 w-px bg-border" />
+              <h1 className="font-semibold text-lg truncate max-w-xs">{tournament.name}</h1>
+            </div>
+            <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
+              COMPLETED
+            </span>
+          </header>
+
+          {/* Bracket Canvas */}
+          <div className="flex-1 relative overflow-hidden">
+            <div className="w-full h-full">
+              <BracketCanvas>
+                <BracketView
+                  tournament={tournament}
+                  selectedMatchId={selectedMatchId}
+                  selectedRoundId={selectedRoundId}
+                  onMatchSelect={setSelectedMatchId}
+                  onRoundSelect={handleRoundSelect}
+                />
+              </BracketCanvas>
+            </div>
+
+            {/* Right-side Drawer Overlay (read-only for completed) */}
+            <div className="absolute top-0 right-0 h-full">
+              {selectedMatch && selectedMatchRound && (
+                <MatchDetailPanel
+                  match={selectedMatch}
+                  round={selectedMatchRound}
+                  players={tournament.players}
+                  onResult={handleMatchResult}
+                  onUndo={handleUndoMatchResult}
+                  onClose={() => setSelectedMatchId(null)}
+                  disabled={true}
+                  isRoundLocked={true}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <VictoryScreen
+        players={tournament.players}
+        tournamentName={tournament.name}
+        onViewBracket={() => setShowBracketInCompleted(true)}
+      />
+    );
   }
 
   // Bracket View (ACTIVE)

@@ -1,7 +1,7 @@
 'use client';
 
-import { ReactNode, useRef } from 'react';
-import { TransformWrapper, TransformComponent, useControls } from 'react-zoom-pan-pinch';
+import { ReactNode, useRef, useCallback } from 'react';
+import { TransformWrapper, TransformComponent, useControls, ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
 
 interface BracketCanvasProps {
   children: ReactNode;
@@ -39,13 +39,35 @@ function ZoomControls() {
 
 export default function BracketCanvas({ children }: BracketCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Pan to show the right side (later rounds) on init
+  const handleInit = useCallback((ref: ReactZoomPanPinchRef) => {
+    // Small delay to ensure content is rendered and measured
+    requestAnimationFrame(() => {
+      const wrapper = ref.instance.wrapperComponent;
+      const content = contentRef.current;
+
+      if (!wrapper || !content) return;
+
+      const wrapperWidth = wrapper.clientWidth;
+      const contentWidth = content.scrollWidth;
+
+      // If content is wider than viewport, pan to show the right side
+      if (contentWidth > wrapperWidth) {
+        const panX = -(contentWidth - wrapperWidth);
+        ref.setTransform(panX, 0, 1, 0);
+      }
+    });
+  }, []);
 
   return (
     <div ref={containerRef} className="relative w-full h-full bg-primary overflow-hidden">
       <TransformWrapper
         initialScale={1}
-        minScale={0.5}
+        minScale={0.25}
         maxScale={2}
+        onInit={handleInit}
         panning={{
           velocityDisabled: true,
           excluded: ['match-node'],
@@ -60,11 +82,12 @@ export default function BracketCanvas({ children }: BracketCanvasProps) {
           contentStyle={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
             minHeight: '100%',
           }}
         >
-          {children}
+          <div ref={contentRef}>
+            {children}
+          </div>
         </TransformComponent>
       </TransformWrapper>
 

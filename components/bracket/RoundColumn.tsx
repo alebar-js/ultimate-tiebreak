@@ -1,6 +1,7 @@
 'use client';
 
 import type { IRound, IPlayer } from '@/lib/types';
+import { getRoundDisplayName } from '@/lib/game-logic';
 import BracketMatchNode from './BracketMatchNode';
 
 interface RoundColumnProps {
@@ -33,7 +34,7 @@ export default function RoundColumn({
       <button
         onClick={() => onRoundSelect(round.roundNumber)}
         className={`
-          text-sm font-semibold mb-4 px-3 py-1 rounded-full transition-all
+          round-badge text-sm font-semibold mb-4 px-3 py-1 rounded-full transition-all
           hover:scale-105 active:scale-95 cursor-pointer
           ${selectedRoundId === round.roundNumber
             ? 'ring-2 ring-white ring-offset-2 ring-offset-primary'
@@ -47,9 +48,9 @@ export default function RoundColumn({
           }
         `}
       >
-        {round.roundNumber === 0 ? 'Qualifier' : `Round ${round.roundNumber}`}
+        {getRoundDisplayName(round)}
         {round.isComplete && !isCurrentRound && (
-          <span className="ml-1 opacity-60">done</span>
+          <span className="ml-1 opacity-60">✓</span>
         )}
       </button>
 

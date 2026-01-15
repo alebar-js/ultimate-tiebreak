@@ -9,6 +9,7 @@ import Link from 'next/link';
 interface VictoryScreenProps {
   players: IPlayer[];
   tournamentName: string;
+  onViewBracket?: () => void;
 }
 
 // Simple seeded random for deterministic confetti
@@ -63,7 +64,7 @@ function Confetti() {
   );
 }
 
-export default function VictoryScreen({ players, tournamentName }: VictoryScreenProps) {
+export default function VictoryScreen({ players, tournamentName, onViewBracket }: VictoryScreenProps) {
   const winners = players.filter((p) => !p.isEliminated);
 
   return (
@@ -99,11 +100,18 @@ export default function VictoryScreen({ players, tournamentName }: VictoryScreen
             {winners.length} player{winners.length !== 1 ? 's' : ''} remaining when fewer than 4 players were left
           </p>
 
-          <Link href="/">
-            <Button variant="secondary" className="w-full">
-              Back to Home
-            </Button>
-          </Link>
+          <div className="space-y-3">
+            {onViewBracket && (
+              <Button onClick={onViewBracket} className="w-full">
+                View Bracket
+              </Button>
+            )}
+            <Link href="/">
+              <Button variant="secondary" className="w-full">
+                Back to Home
+              </Button>
+            </Link>
+          </div>
         </div>
       </Card>
     </div>

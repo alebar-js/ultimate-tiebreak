@@ -9,6 +9,16 @@ interface BracketMatchNodeProps {
   onClick: () => void;
 }
 
+const TeamNameDisplay = ({ teamNames }: { teamNames: string[] }) => {
+  return <>
+    {teamNames.map((name, index) => (
+      <div key={index} className="text-sm font-medium truncate">
+        {name}
+      </div>
+    ))}
+  </>
+}
+
 export default function BracketMatchNode({
   match,
   players,
@@ -18,7 +28,6 @@ export default function BracketMatchNode({
   const getPlayerNames = (playerIds: string[]) => {
     return playerIds
       .map((id) => players.find((p) => p.id === id)?.name || '?')
-      .join(' & ');
   };
 
   const team1Names = getPlayerNames(match.team1.playerIds);
@@ -53,7 +62,7 @@ export default function BracketMatchNode({
           }
         `}
       >
-        {team1Names}
+        <TeamNameDisplay teamNames={team1Names} />
       </div>
 
       {/* Divider */}
@@ -71,7 +80,7 @@ export default function BracketMatchNode({
           }
         `}
       >
-        {team2Names}
+        <TeamNameDisplay teamNames={team2Names} />
       </div>
     </button>
   );
