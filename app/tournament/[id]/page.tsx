@@ -192,9 +192,9 @@ export default function TournamentPage({ params }: TournamentPageProps) {
         )}
 
         {/* Main Content: Canvas + Panel */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 relative overflow-hidden">
           {/* Bracket Canvas */}
-          <div className="flex-1 h-full">
+          <div className="w-full h-full">
             <BracketCanvas>
               <BracketView
                 tournament={tournament}
@@ -202,36 +202,40 @@ export default function TournamentPage({ params }: TournamentPageProps) {
                 selectedRoundId={selectedRoundId}
                 onMatchSelect={setSelectedMatchId}
                 onRoundSelect={handleRoundSelect}
+                onStartNextRound={handleNextRound}
               />
             </BracketCanvas>
           </div>
 
-          {/* Match Detail Panel */}
-          {selectedMatch && selectedMatchRound && (
-            <MatchDetailPanel
-              match={selectedMatch}
-              round={selectedMatchRound}
-              players={tournament.players}
-              onResult={handleMatchResult}
-              onUndo={handleUndoMatchResult}
-              onClose={() => setSelectedMatchId(null)}
-              disabled={matchResultMutation.isPending || undoMatchResultMutation.isPending}
-              isRoundLocked={isSelectedRoundLocked}
-            />
-          )}
+          {/* Right-side Drawer Overlay */}
+          <div className="absolute top-0 right-0 h-full">
+            {/* Match Detail Panel */}
+            {selectedMatch && selectedMatchRound && (
+              <MatchDetailPanel
+                match={selectedMatch}
+                round={selectedMatchRound}
+                players={tournament.players}
+                onResult={handleMatchResult}
+                onUndo={handleUndoMatchResult}
+                onClose={() => setSelectedMatchId(null)}
+                disabled={matchResultMutation.isPending || undoMatchResultMutation.isPending}
+                isRoundLocked={isSelectedRoundLocked}
+              />
+            )}
 
-          {/* Round Detail Panel */}
-          {selectedRound && !selectedMatch && (
-            <RoundDetailPanel
-              round={selectedRound}
-              players={tournament.players}
-              onDelete={handleDeleteRound}
-              onRedraw={handleRedrawRound}
-              onClose={() => setSelectedRoundId(null)}
-              disabled={deleteRoundMutation.isPending || redrawRoundMutation.isPending}
-              isCurrentRound={isSelectedRoundCurrent}
-            />
-          )}
+            {/* Round Detail Panel */}
+            {selectedRound && !selectedMatch && (
+              <RoundDetailPanel
+                round={selectedRound}
+                players={tournament.players}
+                onDelete={handleDeleteRound}
+                onRedraw={handleRedrawRound}
+                onClose={() => setSelectedRoundId(null)}
+                disabled={deleteRoundMutation.isPending || redrawRoundMutation.isPending}
+                isCurrentRound={isSelectedRoundCurrent}
+              />
+            )}
+          </div>
         </div>
       </div>
     );

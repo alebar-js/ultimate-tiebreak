@@ -57,16 +57,6 @@ export default function BracketHeader({
 
       {/* Right: Actions */}
       <div className="flex items-center gap-3">
-        {canStartNextRound && (
-          <Button
-            onClick={onNextRound}
-            loading={actionLoading}
-            variant="accent"
-            size="sm"
-          >
-            Start Next Round
-          </Button>
-        )}
         <span className={`text-xs px-2 py-1 rounded-full ${
           tournament.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
         }`}>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import type { IRound, IPlayer } from '@/lib/types';
 import Button from '@/components/ui/Button';
 
@@ -22,6 +23,54 @@ export default function RoundDetailPanel({
   disabled = false,
   isCurrentRound = false,
 }: RoundDetailPanelProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const closeTimeoutRef = useRef<number | null>(null);
+
+  const closeWithAnimation = () => {
+    setIsOpen(false);
+
+    if (closeTimeoutRef.current !== null) {
+      window.clearTimeout(closeTimeoutRef.current);
+    }
+
+    closeTimeoutRef.current = window.setTimeout(() => {
+      onClose();
+    }, 200);
+  };
+
+  useEffect(() => {
+    const raf = window.requestAnimationFrame(() => setIsOpen(true));
+    return () => window.cancelAnimationFrame(raf);
+  }, []);
+
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+
+      if (containerRef.current && !containerRef.current.contains(target)) {
+        closeWithAnimation();
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current !== null) {
+        window.clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const getPlayerName = (playerId: string) => {
     return players.find((p) => p.id === playerId)?.name || '?';
   };
@@ -33,7 +82,14 @@ export default function RoundDetailPanel({
   const canRedraw = isCurrentRound && !hasCompletedMatches;
 
   return (
-    <div className="w-96 h-full bg-white border-l border-border shadow-xl flex flex-col">
+    <div
+      ref={containerRef}
+      className={
+        `w-96 h-full bg-white border-l border-border shadow-xl flex flex-col ` +
+        `transform transition-transform duration-200 ease-out ` +
+        (isOpen ? 'translate-x-0' : 'translate-x-full')
+      }
+    >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div>
@@ -43,7 +99,7 @@ export default function RoundDetailPanel({
           </p>
         </div>
         <button
-          onClick={onClose}
+          onClick={closeWithAnimation}
           className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors text-gray-500 hover:text-foreground"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
