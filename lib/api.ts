@@ -37,6 +37,22 @@ const api = {
     return response.json();
   },
 
+  // Create demo tournament
+  createDemoTournament: async (playerCount: number): Promise<{ tournamentId: string; password: string }> => {
+    const response = await fetch('/api/tournament/demo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerCount }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || 'Failed to create demo tournament');
+    }
+
+    return response.json();
+  },
+
   // Find tournament by name with password
   findTournament: async (name: string, password: string): Promise<ITournament> => {
     const response = await fetch(`/api/tournament/find/${encodeURIComponent(name.trim())}`, {
@@ -321,6 +337,12 @@ export const useCreateTournamentMutation = () => {
   return useMutation({
     mutationFn: ({ name, password }: { name: string; password: string }) => 
       api.createTournament(name, password),
+  });
+};
+
+export const useCreateDemoTournamentMutation = () => {
+  return useMutation({
+    mutationFn: (playerCount: number) => api.createDemoTournament(playerCount),
   });
 };
 

@@ -1,5 +1,6 @@
 import CreateTournamentForm from '@/components/tournament/CreateTournamentForm';
 import ContinueTournamentForm from '@/components/tournament/ContinueTournamentForm';
+import DemoTournamentForm from '@/components/tournament/DemoTournamentForm';
 
 export default function Home() {
   return (
@@ -18,12 +19,15 @@ export default function Home() {
 
       {/* Forms Section */}
       <main className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-3">
           <div>
             <CreateTournamentForm />
           </div>
           <div>
             <ContinueTournamentForm />
+          </div>
+          <div>
+            <DemoTournamentForm />
           </div>
         </div>
 
