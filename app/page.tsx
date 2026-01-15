@@ -1,6 +1,7 @@
 import CreateTournamentForm from '@/components/tournament/CreateTournamentForm';
 import ContinueTournamentForm from '@/components/tournament/ContinueTournamentForm';
 import DemoTournamentForm from '@/components/tournament/DemoTournamentForm';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -68,6 +69,7 @@ export default function Home() {
         {/* Footer */}
         <footer className="mt-16 pt-8 border-t border-border text-center text-sm text-gray-500">
           <p>Ultimate Tiebreak Tournament Manager</p>
+          <Link href='/admin'>Admin</Link>
         </footer>
       </main>
     </div>
