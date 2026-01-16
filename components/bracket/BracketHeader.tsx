@@ -21,7 +21,7 @@ export default function BracketHeader({
   const canStartNextRound = currentRound?.isComplete && tournament.status === 'ACTIVE';
 
   return (
-    <header className="bg-white border-b border-border px-4 py-3 flex items-center justify-between gap-4 z-20">
+    <header className="bg-white border-b border-border px-4 py-3 flex items-center justify-between relative z-20">
       {/* Left: Home + Title */}
       <div className="flex items-center gap-4">
         <Link
@@ -37,8 +37,8 @@ export default function BracketHeader({
         <h1 className="font-semibold text-lg truncate max-w-xs">{tournament.name}</h1>
       </div>
 
-      {/* Center: Round Info */}
-      <div className="flex items-center gap-3">
+      {/* Center: Round Info - absolutely positioned to be truly centered */}
+      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
         <div className="text-sm">
           <span className="font-semibold text-primary">
             {currentRound ? getRoundDisplayName(currentRound) : 'No rounds'}

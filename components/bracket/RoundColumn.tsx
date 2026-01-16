@@ -10,6 +10,7 @@ interface RoundColumnProps {
   isCurrentRound: boolean;
   selectedMatchId: string | null;
   selectedRoundId: number | null;
+  highlightedPlayerId?: string | null;
   onMatchSelect: (matchId: string) => void;
   onRoundSelect: (roundNumber: number) => void;
 }
@@ -20,6 +21,7 @@ export default function RoundColumn({
   isCurrentRound,
   selectedMatchId,
   selectedRoundId,
+  highlightedPlayerId,
   onMatchSelect,
   onRoundSelect,
 }: RoundColumnProps) {
@@ -62,6 +64,7 @@ export default function RoundColumn({
             match={match}
             players={players}
             isSelected={selectedMatchId === match.id}
+            highlightedPlayerId={highlightedPlayerId}
             onClick={() => onMatchSelect(match.id)}
           />
         ))}

@@ -36,6 +36,7 @@ export default function TournamentPage({ params }: TournamentPageProps) {
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const [selectedRoundId, setSelectedRoundId] = useState<number | null>(null);
   const [showBracketInCompleted, setShowBracketInCompleted] = useState(false);
+  const [highlightedPlayerId, setHighlightedPlayerId] = useState<string | null>(null);
 
   // Query
   const { data: tournament, isLoading: loading, error } = useTournament(id);
@@ -108,6 +109,11 @@ export default function TournamentPage({ params }: TournamentPageProps) {
   const handleRedrawRound = async (roundNumber: number) => {
     redrawRoundMutation.mutate(roundNumber);
   };
+
+  // Find highlighted player name
+  const highlightedPlayer = highlightedPlayerId
+    ? tournament?.players.find((p) => p.id === highlightedPlayerId)
+    : null;
 
   // Find selected match and its round
   const selectedMatch = tournament?.rounds
@@ -198,11 +204,31 @@ export default function TournamentPage({ params }: TournamentPageProps) {
                   tournament={tournament}
                   selectedMatchId={selectedMatchId}
                   selectedRoundId={selectedRoundId}
+                  highlightedPlayerId={highlightedPlayerId}
                   onMatchSelect={setSelectedMatchId}
                   onRoundSelect={handleRoundSelect}
                 />
               </BracketCanvas>
             </div>
+
+            {/* Highlight Indicator */}
+            {highlightedPlayer && (
+              <div className="absolute top-4 right-4 z-10 flex items-center gap-2 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg px-3 py-2 border border-accent">
+                <span className="text-sm">
+                  <span className="text-gray-500">Highlighting:</span>{' '}
+                  <span className="font-semibold text-accent">{highlightedPlayer.name}</span>
+                </span>
+                <button
+                  onClick={() => setHighlightedPlayerId(null)}
+                  className="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+                  title="Clear highlight"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            )}
 
             {/* Right-side Drawer Overlay (read-only for completed) */}
             <div className="absolute top-0 right-0 h-full">
@@ -214,6 +240,8 @@ export default function TournamentPage({ params }: TournamentPageProps) {
                   onResult={handleMatchResult}
                   onUndo={handleUndoMatchResult}
                   onClose={() => setSelectedMatchId(null)}
+                  onPlayerClick={setHighlightedPlayerId}
+                  highlightedPlayerId={highlightedPlayerId}
                   disabled={true}
                   isRoundLocked={true}
                 />
@@ -265,12 +293,32 @@ export default function TournamentPage({ params }: TournamentPageProps) {
                 tournament={tournament}
                 selectedMatchId={selectedMatchId}
                 selectedRoundId={selectedRoundId}
+                highlightedPlayerId={highlightedPlayerId}
                 onMatchSelect={setSelectedMatchId}
                 onRoundSelect={handleRoundSelect}
                 onStartNextRound={handleNextRound}
               />
             </BracketCanvas>
           </div>
+
+          {/* Highlight Indicator */}
+          {highlightedPlayer && (
+            <div className="absolute top-4 right-4 z-10 flex items-center gap-2 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg px-3 py-2 border border-accent">
+              <span className="text-sm">
+                <span className="text-gray-500">Highlighting:</span>{' '}
+                <span className="font-semibold text-accent">{highlightedPlayer.name}</span>
+              </span>
+              <button
+                onClick={() => setHighlightedPlayerId(null)}
+                className="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+                title="Clear highlight"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
 
           {/* Right-side Drawer Overlay */}
           <div className="absolute top-0 right-0 h-full">
@@ -283,6 +331,8 @@ export default function TournamentPage({ params }: TournamentPageProps) {
                 onResult={handleMatchResult}
                 onUndo={handleUndoMatchResult}
                 onClose={() => setSelectedMatchId(null)}
+                onPlayerClick={setHighlightedPlayerId}
+                highlightedPlayerId={highlightedPlayerId}
                 disabled={matchResultMutation.isPending || undoMatchResultMutation.isPending}
                 isRoundLocked={isSelectedRoundLocked}
               />

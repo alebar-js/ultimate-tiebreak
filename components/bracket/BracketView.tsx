@@ -7,6 +7,7 @@ interface BracketViewProps {
   tournament: ITournament;
   selectedMatchId: string | null;
   selectedRoundId: number | null;
+  highlightedPlayerId?: string | null;
   onMatchSelect: (matchId: string) => void;
   onRoundSelect: (roundNumber: number) => void;
   onStartNextRound?: () => void;
@@ -16,6 +17,7 @@ export default function BracketView({
   tournament,
   selectedMatchId,
   selectedRoundId,
+  highlightedPlayerId,
   onMatchSelect,
   onRoundSelect,
   onStartNextRound,
@@ -30,6 +32,7 @@ export default function BracketView({
           isCurrentRound={round.roundNumber === tournament.currentRound}
           selectedMatchId={selectedMatchId}
           selectedRoundId={selectedRoundId}
+          highlightedPlayerId={highlightedPlayerId}
           onMatchSelect={onMatchSelect}
           onRoundSelect={onRoundSelect}
         />

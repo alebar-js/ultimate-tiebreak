@@ -12,6 +12,8 @@ interface MatchDetailPanelProps {
   onResult: (matchId: string, winnerTeam: 1 | 2) => Promise<void>;
   onUndo: (matchId: string) => Promise<void>;
   onClose: () => void;
+  onPlayerClick?: (playerId: string | null) => void;
+  highlightedPlayerId?: string | null;
   disabled?: boolean;
   isRoundLocked?: boolean;
 }
@@ -23,6 +25,8 @@ export default function MatchDetailPanel({
   onResult,
   onUndo,
   onClose,
+  onPlayerClick,
+  highlightedPlayerId,
   disabled = false,
   isRoundLocked = false,
 }: MatchDetailPanelProps) {
@@ -90,10 +94,25 @@ export default function MatchDetailPanel({
     return players.find((p) => p.id === playerId)?.name || '?';
   };
 
-  const team1Player1 = getPlayerName(match.team1.playerIds[0]);
-  const team1Player2 = getPlayerName(match.team1.playerIds[1]);
-  const team2Player1 = getPlayerName(match.team2.playerIds[0]);
-  const team2Player2 = getPlayerName(match.team2.playerIds[1]);
+  const handlePlayerClick = (playerId: string) => {
+    if (!onPlayerClick) return;
+    // Toggle: if clicking the same player, clear the highlight
+    if (highlightedPlayerId === playerId) {
+      onPlayerClick(null);
+    } else {
+      onPlayerClick(playerId);
+    }
+  };
+
+  const team1Player1Id = match.team1.playerIds[0];
+  const team1Player2Id = match.team1.playerIds[1];
+  const team2Player1Id = match.team2.playerIds[0];
+  const team2Player2Id = match.team2.playerIds[1];
+
+  const team1Player1 = getPlayerName(team1Player1Id);
+  const team1Player2 = getPlayerName(team1Player2Id);
+  const team2Player1 = getPlayerName(team2Player1Id);
+  const team2Player2 = getPlayerName(team2Player2Id);
 
   const isComplete = match.winnerTeam !== null;
   const team1Won = match.winnerTeam === 1;
@@ -141,17 +160,27 @@ export default function MatchDetailPanel({
           `}
         >
           <div className="flex h-20">
-            <div className="flex-1 flex items-center justify-center px-2">
+            <button
+              onClick={() => handlePlayerClick(team1Player1Id)}
+              className={`flex-1 flex items-center justify-center px-2 transition-colors hover:bg-primary/10 ${
+                highlightedPlayerId === team1Player1Id ? 'bg-primary/20 ring-2 ring-primary ring-inset' : ''
+              }`}
+            >
               <span className={`font-semibold text-center ${team1Won ? 'text-primary' : 'text-primary'}`}>
                 {team1Player1}
               </span>
-            </div>
+            </button>
             <div className="w-0.5 bg-primary" />
-            <div className="flex-1 flex items-center justify-center px-2">
+            <button
+              onClick={() => handlePlayerClick(team1Player2Id)}
+              className={`flex-1 flex items-center justify-center px-2 transition-colors hover:bg-primary/10 ${
+                highlightedPlayerId === team1Player2Id ? 'bg-primary/20 ring-2 ring-primary ring-inset' : ''
+              }`}
+            >
               <span className={`font-semibold text-center ${team1Won ? 'text-primary' : 'text-primary'}`}>
                 {team1Player2}
               </span>
-            </div>
+            </button>
           </div>
           {team1Won && (
             <div className="bg-primary/10 text-primary text-center text-sm font-medium py-1">
@@ -178,17 +207,27 @@ export default function MatchDetailPanel({
           `}
         >
           <div className="flex h-20">
-            <div className="flex-1 flex items-center justify-center px-2">
+            <button
+              onClick={() => handlePlayerClick(team2Player1Id)}
+              className={`flex-1 flex items-center justify-center px-2 transition-colors hover:bg-accent/10 ${
+                highlightedPlayerId === team2Player1Id ? 'bg-accent/20 ring-2 ring-accent ring-inset' : ''
+              }`}
+            >
               <span className={`font-semibold text-center ${team2Won ? 'text-accent' : 'text-accent'}`}>
                 {team2Player1}
               </span>
-            </div>
+            </button>
             <div className="w-0.5 bg-accent" />
-            <div className="flex-1 flex items-center justify-center px-2">
+            <button
+              onClick={() => handlePlayerClick(team2Player2Id)}
+              className={`flex-1 flex items-center justify-center px-2 transition-colors hover:bg-accent/10 ${
+                highlightedPlayerId === team2Player2Id ? 'bg-accent/20 ring-2 ring-accent ring-inset' : ''
+              }`}
+            >
               <span className={`font-semibold text-center ${team2Won ? 'text-accent' : 'text-accent'}`}>
                 {team2Player2}
               </span>
-            </div>
+            </button>
           </div>
           {team2Won && (
             <div className="bg-accent/10 text-accent text-center text-sm font-medium py-1">
