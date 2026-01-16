@@ -68,6 +68,8 @@ export default function BracketCanvas({ children }: BracketCanvasProps) {
         minScale={0.25}
         maxScale={2}
         onInit={handleInit}
+        limitToBounds={false}
+        centerZoomedOut={false}
         panning={{
           velocityDisabled: true,
           excluded: ['match-node'],
