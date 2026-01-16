@@ -60,9 +60,6 @@ export default function CreateTournamentForm() {
           disabled={isPending}
           maxLength={128}
         />
-        <div className="text-xs text-gray-500">
-          {name.length}/128 characters
-        </div>
         <Input
           label="Password"
           type="password"
