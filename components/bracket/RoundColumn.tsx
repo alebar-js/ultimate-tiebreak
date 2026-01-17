@@ -4,6 +4,17 @@ import type { IRound, IPlayer } from '@/lib/types';
 import { getRoundDisplayName } from '@/lib/game-logic';
 import BracketMatchNode from './BracketMatchNode';
 
+const MAX_MATCHES_PER_COLUMN = 6;
+
+// Split array into chunks of specified size
+function chunkArray<T>(array: T[], chunkSize: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += chunkSize) {
+    chunks.push(array.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
+
 interface RoundColumnProps {
   round: IRound;
   players: IPlayer[];
@@ -25,10 +36,13 @@ export default function RoundColumn({
   onMatchSelect,
   onRoundSelect,
 }: RoundColumnProps) {
+  const matchChunks = chunkArray(round.matches, MAX_MATCHES_PER_COLUMN);
+  const hasMultipleColumns = matchChunks.length > 1;
+
   return (
     <div
       className={`
-        flex flex-col items-center px-4 py-6 min-w-[220px]
+        flex flex-col items-center px-4 py-6
         ${isCurrentRound ? 'bg-white/10 rounded-xl' : ''}
       `}
     >
@@ -56,19 +70,38 @@ export default function RoundColumn({
         )}
       </button>
 
-      {/* Matches */}
-      <div className="flex flex-col gap-4">
-        {round.matches.map((match) => (
-          <BracketMatchNode
-            key={match.id}
-            match={match}
-            players={players}
-            isSelected={selectedMatchId === match.id}
-            highlightedPlayerId={highlightedPlayerId}
-            onClick={() => onMatchSelect(match.id)}
-          />
-        ))}
-      </div>
+      {/* Matches - either single column or multiple columns */}
+      {hasMultipleColumns ? (
+        <div className="flex gap-4">
+          {matchChunks.map((chunk, columnIndex) => (
+            <div key={columnIndex} className="flex flex-col gap-4 min-w-[220px]">
+              {chunk.map((match) => (
+                <BracketMatchNode
+                  key={match.id}
+                  match={match}
+                  players={players}
+                  isSelected={selectedMatchId === match.id}
+                  highlightedPlayerId={highlightedPlayerId}
+                  onClick={() => onMatchSelect(match.id)}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4 min-w-[220px]">
+          {round.matches.map((match) => (
+            <BracketMatchNode
+              key={match.id}
+              match={match}
+              players={players}
+              isSelected={selectedMatchId === match.id}
+              highlightedPlayerId={highlightedPlayerId}
+              onClick={() => onMatchSelect(match.id)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
