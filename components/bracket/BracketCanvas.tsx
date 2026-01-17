@@ -124,10 +124,13 @@ export default function BracketCanvas({ children, tournamentId }: BracketCanvasP
             ) : (
               <button
                 onClick={() => setShowQRExpanded(true)}
-                className="bg-white p-2 rounded-lg shadow-lg hover:scale-105 transition-transform"
+                className="p-3 rounded-lg hover:scale-105 transition-transform flex flex-col items-center"
                 title="Show QR code for players"
               >
-                <QRCodeSVG value={playerPageUrl} size={144} />
+                <p className="text-xs text-white font-medium mb-2">Scan to see when you play next!</p>
+                <div className="bg-white p-2 rounded-lg">
+                  <QRCodeSVG value={playerPageUrl} size={144} />
+                </div>
               </button>
             )}
           </div>
