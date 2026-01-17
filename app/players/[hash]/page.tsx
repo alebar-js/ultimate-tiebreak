@@ -17,6 +17,9 @@ interface PlayerMatchInfo {
   round: IRound;
   teammate: IPlayer | undefined;
   opponents: (IPlayer | undefined)[];
+  matchIndex: number;
+  totalMatches: number;
+  matchesAhead: number; // incomplete matches before this one
 }
 
 export default function PlayerPage({ params }: PlayerPageProps) {
@@ -78,14 +81,21 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     const currentRound = tournament.rounds[tournament.rounds.length - 1];
     if (!currentRound) return null;
 
-    // Find match where this player is participating
-    const match = currentRound.matches.find(
+    // Find match index where this player is participating
+    const matchIndex = currentRound.matches.findIndex(
       (m) =>
         m.team1.playerIds.includes(foundPlayer.id) ||
         m.team2.playerIds.includes(foundPlayer.id)
     );
 
-    if (!match) return null;
+    if (matchIndex === -1) return null;
+
+    const match = currentRound.matches[matchIndex];
+
+    // Count incomplete matches before this player's match
+    const matchesAhead = currentRound.matches
+      .slice(0, matchIndex)
+      .filter((m) => m.winnerTeam === null).length;
 
     // Determine teammate and opponents
     const isTeam1 = match.team1.playerIds.includes(foundPlayer.id);
@@ -99,7 +109,15 @@ export default function PlayerPage({ params }: PlayerPageProps) {
       tournament.players.find((p) => p.id === id)
     );
 
-    return { match, round: currentRound, teammate, opponents };
+    return {
+      match,
+      round: currentRound,
+      teammate,
+      opponents,
+      matchIndex,
+      totalMatches: currentRound.matches.length,
+      matchesAhead,
+    };
   }, [tournament, foundPlayer]);
 
   // Check if player is on bye
@@ -108,6 +126,19 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     const currentRound = tournament.rounds[tournament.rounds.length - 1];
     return currentRound?.byes.includes(foundPlayer.id) ?? false;
   }, [tournament, foundPlayer]);
+
+  // Get round progress info (for bye players or general info)
+  const roundProgress = useMemo(() => {
+    if (!tournament) return null;
+    const currentRound = tournament.rounds[tournament.rounds.length - 1];
+    if (!currentRound) return null;
+
+    const totalMatches = currentRound.matches.length;
+    const completedMatches = currentRound.matches.filter((m) => m.winnerTeam !== null).length;
+    const remainingMatches = totalMatches - completedMatches;
+
+    return { totalMatches, completedMatches, remainingMatches };
+  }, [tournament]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -333,6 +364,22 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               <p className="text-sm text-gray-500 mt-1">
                 Sit back and relax. You&apos;ll automatically advance to the next round.
               </p>
+              {roundProgress && roundProgress.totalMatches > 0 && (
+                <div className="mt-4 inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-border">
+                  <span className="text-sm font-medium text-gray-700">
+                    {roundProgress.completedMatches} of {roundProgress.totalMatches} matches complete
+                  </span>
+                  {roundProgress.remainingMatches > 0 ? (
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                      {roundProgress.remainingMatches} remaining
+                    </span>
+                  ) : (
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-semibold">
+                      Round complete!
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </Card>
         )}
@@ -342,7 +389,23 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             <div className="text-center mb-4">
               <p className="font-semibold text-lg text-accent">{foundPlayer.name}</p>
               {playerMatchInfo.match.winnerTeam === null ? (
-                <p className="text-sm text-gray-500">Your next match:</p>
+                <>
+                  <p className="text-sm text-gray-500">Your next match:</p>
+                  <div className="mt-2 inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-border">
+                    <span className="text-sm font-medium text-gray-700">
+                      Match {playerMatchInfo.matchIndex + 1} of {playerMatchInfo.totalMatches}
+                    </span>
+                    {playerMatchInfo.matchesAhead > 0 ? (
+                      <span className="text-xs bg-accent/10 text-accent px-2 py-0.5 rounded-full">
+                        {playerMatchInfo.matchesAhead} match{playerMatchInfo.matchesAhead !== 1 ? 'es' : ''} ahead
+                      </span>
+                    ) : (
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">
+                        You&apos;re up!
+                      </span>
+                    )}
+                  </div>
+                </>
               ) : (
                 <p className="text-sm text-gray-500">Current match result:</p>
               )}
