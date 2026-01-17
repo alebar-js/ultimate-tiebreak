@@ -119,7 +119,7 @@ export default function BracketCanvas({ children, tournamentId }: BracketCanvasP
                     </svg>
                   </button>
                 </div>
-                <QRCodeSVG value={playerPageUrl} size={180} />
+                <QRCodeSVG value={playerPageUrl} size={360} />
               </div>
             ) : (
               <button
@@ -127,7 +127,7 @@ export default function BracketCanvas({ children, tournamentId }: BracketCanvasP
                 className="bg-white p-2 rounded-lg shadow-lg hover:scale-105 transition-transform"
                 title="Show QR code for players"
               >
-                <QRCodeSVG value={playerPageUrl} size={72} />
+                <QRCodeSVG value={playerPageUrl} size={144} />
               </button>
             )}
           </div>
