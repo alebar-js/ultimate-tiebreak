@@ -199,7 +199,7 @@ export default function TournamentPage({ params }: TournamentPageProps) {
           {/* Bracket Canvas */}
           <div className="flex-1 relative overflow-hidden">
             <div className="w-full h-full">
-              <BracketCanvas>
+              <BracketCanvas tournamentId={tournament._id}>
                 <BracketView
                   tournament={tournament}
                   selectedMatchId={selectedMatchId}
@@ -288,7 +288,7 @@ export default function TournamentPage({ params }: TournamentPageProps) {
         <div className="flex-1 relative overflow-hidden">
           {/* Bracket Canvas */}
           <div className="w-full h-full">
-            <BracketCanvas>
+            <BracketCanvas tournamentId={tournament._id}>
               <BracketView
                 tournament={tournament}
                 selectedMatchId={selectedMatchId}

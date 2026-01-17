@@ -5,6 +5,7 @@ import type { ITournament } from '@/lib/types';
 export const QUERY_KEYS = {
   tournament: (id: string) => ['tournament', id],
   findTournament: (name: string) => ['findTournament', name],
+  playerTournament: (hash: string) => ['playerTournament', hash],
 } as const;
 
 // API Base Functions
@@ -15,6 +16,21 @@ const api = {
     if (!response.ok) {
       if (response.status === 404) {
         throw new Error('Tournament not found');
+      }
+      throw new Error('Failed to fetch tournament');
+    }
+    return response.json();
+  },
+
+  // Tournament by hash (for player page)
+  getTournamentByHash: async (hash: string): Promise<ITournament> => {
+    const response = await fetch(`/api/players/${hash}`);
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Tournament not found');
+      }
+      if (response.status === 400) {
+        throw new Error('Invalid tournament link');
       }
       throw new Error('Failed to fetch tournament');
     }
@@ -244,6 +260,14 @@ export const useTournament = (id: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.tournament(id),
     queryFn: () => api.getTournament(id),
+  });
+};
+
+export const usePlayerTournament = (hash: string) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.playerTournament(hash),
+    queryFn: () => api.getTournamentByHash(hash),
+    refetchInterval: 10000, // Refetch every 10 seconds to keep player info updated
   });
 };
 
