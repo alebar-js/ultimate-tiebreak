@@ -207,15 +207,11 @@ const api = {
     return response.json();
   },
 
-  // Admin functions
+  // Admin functions (uses session-based authentication)
   admin: {
     // Get all tournaments
-    getAllTournaments: async (adminPassword: string): Promise<any[]> => {
-      const response = await fetch('/api/admin/tournaments', {
-        headers: {
-          'X-Admin-Password': adminPassword,
-        },
-      });
+    getAllTournaments: async (): Promise<any[]> => {
+      const response = await fetch('/api/admin/tournaments');
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || 'Failed to fetch tournaments');
@@ -224,12 +220,9 @@ const api = {
     },
 
     // Delete tournament
-    deleteTournament: async (id: string, adminPassword: string): Promise<{ message: string }> => {
+    deleteTournament: async (id: string): Promise<{ message: string }> => {
       const response = await fetch(`/api/admin/tournaments/${id}`, {
         method: 'DELETE',
-        headers: {
-          'X-Admin-Password': adminPassword,
-        },
       });
       if (!response.ok) {
         const data = await response.json();
@@ -239,12 +232,9 @@ const api = {
     },
 
     // Reset tournament
-    resetTournament: async (id: string, adminPassword: string): Promise<ITournament> => {
+    resetTournament: async (id: string): Promise<ITournament> => {
       const response = await fetch(`/api/admin/tournaments/${id}`, {
         method: 'PATCH',
-        headers: {
-          'X-Admin-Password': adminPassword,
-        },
       });
       if (!response.ok) {
         const data = await response.json();
@@ -392,31 +382,31 @@ export const useRedrawRoundMutation = (id: string) => {
   });
 };
 
-// Admin mutations
-export const useAdminTournamentsQuery = (adminPassword: string) => {
+// Admin queries and mutations (uses session-based authentication)
+export const useAdminTournamentsQuery = (enabled: boolean = true) => {
   return useQuery({
     queryKey: ['admin', 'tournaments'],
-    queryFn: () => api.admin.getAllTournaments(adminPassword),
-    enabled: !!adminPassword,
+    queryFn: () => api.admin.getAllTournaments(),
+    enabled,
   });
 };
 
-export const useAdminDeleteTournamentMutation = (adminPassword: string) => {
+export const useAdminDeleteTournamentMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (id: string) => api.admin.deleteTournament(id, adminPassword),
+    mutationFn: (id: string) => api.admin.deleteTournament(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'tournaments'] });
     },
   });
 };
 
-export const useAdminResetTournamentMutation = (adminPassword: string) => {
+export const useAdminResetTournamentMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (id: string) => api.admin.resetTournament(id, adminPassword),
+    mutationFn: (id: string) => api.admin.resetTournament(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'tournaments'] });
     },

@@ -16,13 +16,14 @@ interface Tournament {
   password: string; // Plaintext is acceptable per requirements "minimal layer of security"
   status: 'PENDING' | 'ACTIVE' | 'COMPLETED';
   currentRound: number;
-  
+  ownerId?: string; // Email of the Google account that created this tournament (optional for legacy tournaments)
+
   // All players registered
-  players: Player[]; 
-  
+  players: Player[];
+
   // History of rounds
   rounds: Round[];
-  
+
   createdAt: Date;
 }
 
@@ -50,3 +51,28 @@ interface Match {
   winnerTeam: 1 | 2 | null; // Null if not played yet
 }
 ```
+
+### 2. User
+Stores authenticated users from Google OAuth. Used for tournament ownership and admin access.
+
+```typescript
+interface User {
+  _id: ObjectId;
+  email: string; // Google account email (unique)
+  name: string | null;
+  image: string | null; // Google profile picture URL
+  createdAt: Date;
+}
+```
+
+## Authentication & Authorization
+
+### Tournament Ownership
+- New tournaments are created with `ownerId` set to the creator's email
+- Only the owner can modify their tournament (add players, start, record results, etc.)
+- Legacy tournaments (without `ownerId`) can be modified by anyone (backward compatibility)
+
+### Admin Access
+- Admin users are defined by the `ADMIN_EMAILS` environment variable (comma-separated list)
+- Admins can view all tournaments, delete any tournament, and reset tournament state
+- Admin access is checked on the server via session email

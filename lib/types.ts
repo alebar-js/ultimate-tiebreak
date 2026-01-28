@@ -1,5 +1,13 @@
 export type TournamentStatus = 'PENDING' | 'ACTIVE' | 'COMPLETED';
 
+export interface IUser {
+  _id: string;
+  email: string;
+  name: string | null;
+  image: string | null;
+  createdAt: Date;
+}
+
 export interface IPlayer {
   id: string;
   name: string;
@@ -32,6 +40,7 @@ export interface ITournament {
   currentRound: number;
   players: IPlayer[];
   rounds: IRound[];
+  ownerId?: string; // User email - optional for legacy tournaments
   createdAt: Date;
 }
 

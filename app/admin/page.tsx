@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
+import { useSession, signOut } from 'next-auth/react';
 import {
   useAdminTournamentsQuery,
   useAdminDeleteTournamentMutation,
@@ -10,6 +10,7 @@ import {
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import SignInButton from '@/components/auth/SignInButton';
 
 interface AdminTournament {
   _id: string;
@@ -20,25 +21,17 @@ interface AdminTournament {
   roundCount: number;
   completedMatchesCount: number;
   createdAt: string;
+  ownerId?: string;
 }
 
 export default function AdminPage() {
-  const [adminPassword, setAdminPassword] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { data: session, status: authStatus } = useSession();
+  const isAuthenticated = authStatus === 'authenticated';
 
-  const { data: tournaments, isLoading, error } = useAdminTournamentsQuery(
-    isAuthenticated ? adminPassword : ''
-  );
-  
-  const deleteMutation = useAdminDeleteTournamentMutation(adminPassword);
-  const resetMutation = useAdminResetTournamentMutation(adminPassword);
+  const { data: tournaments, isLoading, error } = useAdminTournamentsQuery(isAuthenticated);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (adminPassword.trim()) {
-      setIsAuthenticated(true);
-    }
-  };
+  const deleteMutation = useAdminDeleteTournamentMutation();
+  const resetMutation = useAdminResetTournamentMutation();
 
   const handleDeleteTournament = async (id: string, name: string) => {
     if (window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
@@ -69,31 +62,26 @@ export default function AdminPage() {
     }
   };
 
+  // Show loading state while checking auth
+  if (authStatus === 'loading') {
+    return (
+      <div className="min-h-screen bg-muted flex items-center justify-center p-4">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  // Show sign-in prompt if not authenticated
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-muted flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <div className="p-6">
             <h1 className="text-2xl font-bold text-center mb-6">Admin Access</h1>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium mb-2">
-                  Admin Password
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Enter admin password"
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={!adminPassword.trim()}>
-                Access Admin Panel
-              </Button>
-            </form>
+            <p className="text-sm text-gray-500 text-center mb-6">
+              Sign in with a Google account that has admin privileges to access the admin panel.
+            </p>
+            <SignInButton className="w-full" />
             <div className="mt-6 text-center">
               <Link href="/" className="text-sm text-gray-500 hover:text-primary transition-colors">
                 ← Back to Home
@@ -114,16 +102,16 @@ export default function AdminPage() {
             ← Back to Home
           </Link>
           <h1 className="font-semibold text-lg">Tournament Admin</h1>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setIsAuthenticated(false);
-              setAdminPassword('');
-            }}
-            size="sm"
-          >
-            Logout
-          </Button>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-500">{session?.user?.email}</span>
+            <Button
+              variant="secondary"
+              onClick={() => signOut()}
+              size="sm"
+            >
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -194,9 +182,9 @@ export default function AdminPage() {
                               <div className="text-gray-500">{tournament.completedMatchesCount} completed</div>
                             </div>
                             <div>
-                              <div className="font-medium">ID</div>
-                              <div className="text-gray-500 font-mono text-xs truncate">
-                                {tournament._id}
+                              <div className="font-medium">Owner</div>
+                              <div className="text-gray-500 text-xs truncate">
+                                {tournament.ownerId || '(legacy)'}
                               </div>
                             </div>
                             <div className="flex items-end gap-2">

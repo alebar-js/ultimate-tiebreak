@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { Tournament } from '@/lib/models';
+import { auth } from '@/lib/auth';
 import type { CreateTournamentInput } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: 'You must be signed in to create a tournament' },
+        { status: 401 }
+      );
+    }
+
     const body: CreateTournamentInput = await request.json();
 
     // Validation
@@ -61,6 +71,7 @@ export async function POST(request: NextRequest) {
       currentRound: 0,
       players: [],
       rounds: [],
+      ownerId: session.user.email,
     });
 
     return NextResponse.json(

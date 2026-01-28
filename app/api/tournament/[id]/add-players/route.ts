@@ -4,6 +4,7 @@ import { Tournament } from '@/lib/models';
 import { generatePlayerId } from '@/lib/game-logic';
 import type { AddPlayersInput, IPlayer } from '@/lib/types';
 import { serializeTournament } from '@/lib/serialize';
+import { auth, canModifyTournament } from '@/lib/auth';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -29,6 +30,15 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json(
         { error: 'Tournament not found' },
         { status: 404 }
+      );
+    }
+
+    // Verify ownership (legacy tournaments without ownerId can be modified by anyone)
+    const session = await auth();
+    if (!canModifyTournament(session?.user?.email, tournament.ownerId)) {
+      return NextResponse.json(
+        { error: 'You do not have permission to modify this tournament' },
+        { status: 403 }
       );
     }
 

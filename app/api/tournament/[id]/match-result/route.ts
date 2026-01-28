@@ -4,6 +4,7 @@ import { Tournament } from '@/lib/models';
 import { serializeTournament } from '@/lib/serialize';
 import { getLosingTeamPlayerIds, isRoundComplete, checkVictoryCondition } from '@/lib/game-logic';
 import type { MatchResultInput } from '@/lib/types';
+import { auth, canModifyTournament } from '@/lib/auth';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -29,6 +30,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json(
         { error: 'Tournament not found' },
         { status: 404 }
+      );
+    }
+
+    // Verify ownership (legacy tournaments without ownerId can be modified by anyone)
+    const session = await auth();
+    if (!canModifyTournament(session?.user?.email, tournament.ownerId)) {
+      return NextResponse.json(
+        { error: 'You do not have permission to modify this tournament' },
+        { status: 403 }
       );
     }
 
@@ -115,6 +125,15 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json(
         { error: 'Tournament not found' },
         { status: 404 }
+      );
+    }
+
+    // Verify ownership (legacy tournaments without ownerId can be modified by anyone)
+    const session = await auth();
+    if (!canModifyTournament(session?.user?.email, tournament.ownerId)) {
+      return NextResponse.json(
+        { error: 'You do not have permission to modify this tournament' },
+        { status: 403 }
       );
     }
 

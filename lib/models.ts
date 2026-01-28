@@ -1,5 +1,5 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import type { ITournament, IPlayer, IRound, IMatch, ITeam } from './types';
+import type { ITournament, IPlayer, IRound, IMatch, ITeam, IUser } from './types';
 
 const TeamSchema = new Schema<ITeam>(
   {
@@ -101,6 +101,10 @@ const TournamentSchema = new Schema<ITournament>(
       type: [RoundSchema],
       default: [],
     },
+    ownerId: {
+      type: String,
+      required: false, // Optional for legacy tournaments
+    },
   },
   {
     timestamps: { createdAt: true, updatedAt: false },
@@ -109,3 +113,28 @@ const TournamentSchema = new Schema<ITournament>(
 
 export const Tournament: Model<ITournament> =
   mongoose.models.Tournament || mongoose.model<ITournament>('Tournament', TournamentSchema);
+
+// User Schema for authenticated users
+const UserSchema = new Schema<IUser>(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    name: {
+      type: String,
+      default: null,
+    },
+    image: {
+      type: String,
+      default: null,
+    },
+  },
+  {
+    timestamps: { createdAt: true, updatedAt: false },
+  }
+);
+
+export const User: Model<IUser> =
+  mongoose.models.User || mongoose.model<IUser>('User', UserSchema);

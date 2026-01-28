@@ -2,13 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useCreateTournamentMutation } from '@/lib/api';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
+import SignInButton from '@/components/auth/SignInButton';
 
 export default function CreateTournamentForm() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
 
@@ -47,6 +50,33 @@ export default function CreateTournamentForm() {
       setName(value);
     }
   };
+
+  // Show loading state while checking auth
+  if (status === 'loading') {
+    return (
+      <Card>
+        <h2 className="text-xl font-semibold mb-4">Create New Tournament</h2>
+        <div className="space-y-4 animate-pulse">
+          <div className="h-10 bg-gray-200 rounded" />
+          <div className="h-10 bg-gray-200 rounded" />
+          <div className="h-10 bg-gray-200 rounded" />
+        </div>
+      </Card>
+    );
+  }
+
+  // Show sign-in prompt if not authenticated
+  if (!session) {
+    return (
+      <Card>
+        <h2 className="text-xl font-semibold mb-4">Create New Tournament</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Sign in with your Google account to create and manage tournaments.
+        </p>
+        <SignInButton className="w-full" />
+      </Card>
+    );
+  }
 
   return (
     <Card>

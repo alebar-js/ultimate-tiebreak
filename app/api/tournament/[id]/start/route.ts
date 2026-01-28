@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/db';
 import { Tournament } from '@/lib/models';
 import { serializeTournament } from '@/lib/serialize';
 import { createRound, createQualifierRound, getActivePlayers } from '@/lib/game-logic';
+import { auth, canModifyTournament } from '@/lib/auth';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -20,6 +21,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json(
         { error: 'Tournament not found' },
         { status: 404 }
+      );
+    }
+
+    // Verify ownership (legacy tournaments without ownerId can be modified by anyone)
+    const session = await auth();
+    if (!canModifyTournament(session?.user?.email, tournament.ownerId)) {
+      return NextResponse.json(
+        { error: 'You do not have permission to modify this tournament' },
+        { status: 403 }
       );
     }
 

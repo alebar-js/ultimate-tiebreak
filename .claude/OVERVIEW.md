@@ -18,15 +18,24 @@ Build a responsive web application to manage a "Ultimate Tiebreak" tennis tourna
 ## User Flows
 
 ### 1. Home Page
--   **Action:** User sees two primary options:
-    -   "Create New Tournament"
-    -   "Continue Existing Tournament"
+-   **Action:** User sees:
+    -   Sign in/out button in header (Google OAuth)
+    -   "Create New Tournament" form (requires sign-in)
+    -   "Continue Existing Tournament" form
+    -   "Try Demo Tournament" form
 
-### 2. Create Tournament
+### 2. Authentication
+-   **Sign In:** Click "Sign in with Google" button to authenticate via Google OAuth
+-   **Sign Out:** Click user avatar dropdown and select "Sign Out"
+-   **Session:** Persists across page refreshes via NextAuth session
+
+### 3. Create Tournament
+-   **Requirement:** Must be signed in with Google account
 -   **Input:** Tournament Name (String), Tournament Password (String).
--   **Action:** Submit creates a generic tournament ID/URL and redirects to the Lobby.
+-   **Action:** Submit creates tournament with current user as owner, redirects to the Lobby.
+-   **Ownership:** Only the creator can modify the tournament (add players, start, record results)
 
-### 3. Player Registration (Lobby)
+### 4. Player Registration (Lobby)
 -   **State:** Tournament is in "Pending" state.
 -   **Input:**
     -   Single Entry: Text input for one name + "Add" button.
@@ -34,7 +43,7 @@ Build a responsive web application to manage a "Ultimate Tiebreak" tennis tourna
 -   **List:** Display list of registered players with a "Remove" option.
 -   **Action:** "Start Tournament" button (Visible only if Player Count >= 4).
 
-### 4. Tournament Bracket/Dashboard
+### 5. Tournament Bracket/Dashboard
 -   **State:** Tournament is in "Active" state.
 -   **View:** Displays the current Round Number.
 -   **List:** Shows a card for each Match generated for this round.
@@ -46,6 +55,14 @@ Build a responsive web application to manage a "Ultimate Tiebreak" tennis tourna
 -   **Transition:** When all matches in the round are complete, a "Start Next Round" button appears.
     -   Clicking this generates new pairings from the survivors + byes.
 
-### 5. Game Over
+### 6. Game Over
 -   **State:** Tournament is "Completed".
 -   **View:** Confetti/Banner displaying the final remaining players as Winners.
+
+### 7. Admin Panel
+-   **Access:** Only users with email in `ADMIN_EMAILS` environment variable
+-   **Features:**
+    -   View all tournaments with summary statistics
+    -   Delete any tournament
+    -   Reset tournament state (clear results, return to pending)
+-   **URL:** `/admin`

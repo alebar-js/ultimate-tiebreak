@@ -1,27 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { Tournament } from '@/lib/models';
 import { serializeTournament } from '@/lib/serialize';
+import { auth, isAdminEmail } from '@/lib/auth';
 
-// Simple password verification
-function verifyAdminPassword(request: NextRequest): boolean {
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminPassword) {
-    console.error('ADMIN_PASSWORD environment variable not set');
-    return false;
-  }
-
-  const providedPassword = request.headers.get('X-Admin-Password');
-  return providedPassword === adminPassword;
-}
-
-// GET - List all tournaments
-export async function GET(request: NextRequest) {
+// GET - List all tournaments (admin only)
+export async function GET() {
   try {
-    if (!verifyAdminPassword(request)) {
+    const session = await auth();
+    if (!session?.user?.email || !isAdminEmail(session.user.email)) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+        { error: 'Unauthorized - Admin access required' },
+        { status: 403 }
       );
     }
 
@@ -35,9 +25,10 @@ export async function GET(request: NextRequest) {
       playerCount: tournament.players.length,
       activePlayerCount: tournament.players.filter(p => !p.isEliminated).length,
       roundCount: tournament.rounds.length,
-      completedMatchesCount: tournament.rounds.reduce((total, round) => 
+      completedMatchesCount: tournament.rounds.reduce((total, round) =>
         total + round.matches.filter(m => m.winnerTeam !== null).length, 0
       ),
+      ownerId: tournament.ownerId || null,
     }));
 
     return NextResponse.json(serializedTournaments);

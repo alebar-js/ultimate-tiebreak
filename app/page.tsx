@@ -1,6 +1,7 @@
 import CreateTournamentForm from '@/components/tournament/CreateTournamentForm';
 import ContinueTournamentForm from '@/components/tournament/ContinueTournamentForm';
 import DemoTournamentForm from '@/components/tournament/DemoTournamentForm';
+import AuthHeader from '@/components/auth/AuthHeader';
 import Link from 'next/link';
 
 export default function Home() {
@@ -8,13 +9,20 @@ export default function Home() {
     <div className="min-h-screen bg-muted">
       {/* Hero Section */}
       <div className="bg-primary text-white">
-        <div className="max-w-4xl mx-auto px-4 py-12 sm:py-16 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4">
-            Ultimate Tiebreak
-          </h1>
-          <p className="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto">
-            Random pairings, live updates, and elimination tracking all in one place.
-          </p>
+        <div className="max-w-4xl mx-auto px-4 py-12 sm:py-16">
+          {/* Auth Header */}
+          <div className="flex justify-end mb-8">
+            <AuthHeader />
+          </div>
+
+          <div className="text-center">
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4">
+              Ultimate Tiebreak
+            </h1>
+            <p className="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto">
+              Random pairings, live updates, and elimination tracking all in one place.
+            </p>
+          </div>
         </div>
       </div>
 
